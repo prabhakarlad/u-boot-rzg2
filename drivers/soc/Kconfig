@@ -16,6 +16,13 @@ config SOC_DEVICE_TI_K3
 	  This allows Texas Instruments Keystone 3 SoCs to identify
 	  specifics about the SoC in use.
 
+config SOC_DEVICE_RENESAS
+	depends on SOC_DEVICE
+	bool "Enable SoC driver for Renesas SoCs"
+	help
+	  This allows Renesas SoCs to identify specifics about the
+	  SoC in use.
+
 source "drivers/soc/ti/Kconfig"
 
 endmenu
