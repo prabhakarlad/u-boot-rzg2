@@ -31,7 +31,7 @@ struct soc_attr {
 
 struct soc_ops {
 	/**
-	 * get_machine() - Get machine name of an SOC
+	 * get_machine() - Get machine name of an SoC
 	 *
 	 * @dev:	Device to check (UCLASS_SOC)
 	 * @buf:	Buffer to place string
@@ -41,7 +41,7 @@ struct soc_ops {
 	int (*get_machine)(struct udevice *dev, char *buf, int size);
 
 	/**
-	 * get_revision() - Get revision name of a SOC
+	 * get_revision() - Get revision name of an SoC
 	 *
 	 * @dev:	Device to check (UCLASS_SOC)
 	 * @buf:	Buffer to place string
@@ -51,7 +51,7 @@ struct soc_ops {
 	int (*get_revision)(struct udevice *dev, char *buf, int size);
 
 	/**
-	 * get_family() - Get family name of an SOC
+	 * get_family() - Get family name of an SoC
 	 *
 	 * @dev:	Device to check (UCLASS_SOC)
 	 * @buf:	Buffer to place string
@@ -76,7 +76,7 @@ struct soc_ops {
 int soc_get(struct udevice **devp);
 
 /**
- * soc_get_machine() - Get machine name of an SOC
+ * soc_get_machine() - Get machine name of an SoC
  * @dev:	Device to check (UCLASS_SOC)
  * @buf:	Buffer to place string
  * @size:	Size of string space
@@ -86,7 +86,7 @@ int soc_get(struct udevice **devp);
 int soc_get_machine(struct udevice *dev, char *buf, int size);
 
 /**
- * soc_get_revision() - Get revision name of an SOC
+ * soc_get_revision() - Get revision name of an SoC
  * @dev:	Device to check (UCLASS_SOC)
  * @buf:	Buffer to place string
  * @size:	Size of string space
@@ -96,7 +96,7 @@ int soc_get_machine(struct udevice *dev, char *buf, int size);
 int soc_get_revision(struct udevice *dev, char *buf, int size);
 
 /**
- * soc_get_family() - Get family name of an SOC
+ * soc_get_family() - Get family name of an SoC
  * @dev:	Device to check (UCLASS_SOC)
  * @buf:	Buffer to place string
  * @size:	Size of string space
