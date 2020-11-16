@@ -755,6 +755,19 @@ bool device_is_compatible(const struct udevice *dev, const char *compat);
 bool of_machine_is_compatible(const char *compat);
 
 /**
+ * of_match_node() - Tell if a device_node has a matching of_match structure
+ *
+ *
+ * Low level utility function used by device matching.
+ *
+ * @matches:	array of of device match structures to search in
+ * @node:	the of device structure to match against
+ * @return matching structure on success, NULL if the match is not found
+ */
+const struct udevice_id *of_match_node(const struct udevice_id *matches,
+				       const ofnode node);
+
+/**
  * dev_disable_by_path() - Disable a device given its device tree path
  *
  * @path:	The device tree path identifying the device to be disabled

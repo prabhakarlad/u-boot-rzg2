@@ -1010,6 +1010,27 @@ bool of_machine_is_compatible(const char *compat)
 	return !fdt_node_check_compatible(fdt, 0, compat);
 }
 
+static
+const struct udevice_id *__of_match_node(const struct udevice_id *matches,
+					 const ofnode node)
+{
+	if (!matches)
+		return NULL;
+
+	for (; matches->compatible; matches++) {
+		if (ofnode_device_is_compatible(node, matches->compatible))
+			return matches;
+	}
+
+	return NULL;
+}
+
+const struct udevice_id *of_match_node(const struct udevice_id *matches,
+				       const ofnode node)
+{
+	return __of_match_node(matches, node);
+}
+
 int dev_disable_by_path(const char *path)
 {
 	struct uclass *uc;

@@ -11,6 +11,7 @@
 #include <fdtdec.h>
 #include <log.h>
 #include <malloc.h>
+#include <dm/device.h>
 #include <dm/device-internal.h>
 #include <dm/root.h>
 #include <dm/util.h>
@@ -1066,3 +1067,33 @@ static int dm_test_inactive_child(struct unit_test_state *uts)
 	return 0;
 }
 DM_TEST(dm_test_inactive_child, UT_TESTF_SCAN_PDATA);
+
+static int dm_test_of_match_node(struct unit_test_state *uts)
+{
+	const ulong test_data_expected = 0x1234;
+	ofnode root_node = ofnode_path("/");
+	const struct udevice_id *match;
+	unsigned long match_data;
+
+	const struct udevice_id soc_device_ids[] = {
+		{ .compatible = "sandbox", .data = test_data_expected, },
+		{ /* sentinel */ }
+	};
+
+	const struct udevice_id soc_device_nomatch_ids[] = {
+		{ .compatible = "sandbox123", .data = test_data_expected, },
+		{ /* sentinel */ }
+	};
+
+	match = of_match_node(soc_device_ids, root_node);
+	ut_assert(match);
+
+	match_data = match->data;
+	ut_asserteq(match_data, test_data_expected);
+
+	match = of_match_node(soc_device_nomatch_ids, root_node);
+	ut_asserteq_ptr(match, NULL);
+
+	return 0;
+}
+DM_TEST(dm_test_of_match_node, UT_TESTF_SCAN_PDATA | UT_TESTF_SCAN_FDT);
