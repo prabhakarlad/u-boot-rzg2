@@ -20,12 +20,14 @@
  *	       variants. Example: am33
  * @machine  - Name of a specific SoC. Example: am3352
  * @revision - Name of a specific SoC revision. Example: SR1.1
+ * @soc_id   - SoC identification string. Example: r8a774a1
  * @data     - A pointer to user data for the SoC variant
  */
 struct soc_attr {
 	const char *family;
 	const char *machine;
 	const char *revision;
+	const char *soc_id;
 	const void *data;
 };
 
@@ -59,6 +61,16 @@ struct soc_ops {
 	 * @return 0 if OK, -ENOSPC if buffer is too small, other -ve on error
 	 */
 	int (*get_family)(struct udevice *dev, char *buf, int size);
+
+	/**
+	 * get_soc_id() - Get SoC identification name of an SoC
+	 *
+	 * @dev:	Device to check (UCLASS_SOC)
+	 * @buf:	Buffer to place string
+	 * @size:	Size of string space
+	 * @return 0 if OK, -ENOSPC if buffer is too small, other -ve on error
+	 */
+	int (*get_soc_id)(struct udevice *dev, char *buf, int size);
 };
 
 #define soc_get_ops(dev)        ((struct soc_ops *)(dev)->driver->ops)
@@ -106,6 +118,16 @@ int soc_get_revision(struct udevice *dev, char *buf, int size);
 int soc_get_family(struct udevice *dev, char *buf, int size);
 
 /**
+ * soc_get_soc_id() - Get SoC identification name of an SoC
+ * @dev:	Device to check (UCLASS_SOC)
+ * @buf:	Buffer to place string
+ * @size:	Size of string space
+ *
+ * Return: 0 if OK, -ENOSPC if buffer is too small, other -ve on error
+ */
+int soc_get_soc_id(struct udevice *dev, char *buf, int size);
+
+/**
  * soc_device_match() - Return match from an array of soc_attr
  * @matches:	Array with any combination of family, revision or machine set
  *
@@ -132,6 +154,11 @@ static inline int soc_get_revision(struct udevice *dev, char *buf, int size)
 }
 
 static inline int soc_get_family(struct udevice *dev, char *buf, int size)
+{
+	return -ENOSYS;
+}
+
+static inline int soc_get_soc_id(struct udevice *dev, char *buf, int size)
 {
 	return -ENOSYS;
 }

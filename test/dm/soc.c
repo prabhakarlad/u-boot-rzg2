@@ -32,24 +32,28 @@ static int dm_test_soc(struct unit_test_state *uts)
 			.family = "SANDBOX0xx",
 			.machine = "SANDBOX012",
 			.revision = "1.0",
+			.soc_id = "r8a774a1",
 			.data = NULL,
 		},
 		{
 			.family = "SANDBOX1xx",
 			.machine = "SANDBOX107",
 			.revision = "1.0",
+			.soc_id = "r8a774a1",
 			.data = NULL,
 		},
 		{
 			.family = "SANDBOX1xx",
 			.machine = "SANDBOX123",
 			.revision = "1.0",
+			.soc_id = "r8a774a1",
 			.data = &soc_sandbox123_data,
 		},
 		{
 			.family = "SANDBOX1xx",
 			.machine = "SANDBOX131",
 			.revision = "2.0",
+			.soc_id = "r8a774a1",
 			.data = NULL,
 		},
 		{ /* sentinel */ }
@@ -78,6 +82,7 @@ static int dm_test_soc(struct unit_test_state *uts)
 		{
 			.family = "SANDBOX0xx",
 			.revision = "1.0",
+			.soc_id = "r8a774b1",
 			.data = NULL,
 		},
 		{
@@ -98,6 +103,9 @@ static int dm_test_soc(struct unit_test_state *uts)
 
 	ut_assertok(soc_get_revision(dev, text, sizeof(text)));
 	ut_asserteq_str(text, "1.0");
+
+	ut_assertok(soc_get_soc_id(dev, text, sizeof(text)));
+	ut_asserteq_str(text, "r8a774a1");
 
 	soc_data = soc_device_match(sb_soc_devices_full);
 	ut_assert(soc_data);

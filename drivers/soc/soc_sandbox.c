@@ -31,10 +31,18 @@ int soc_sandbox_get_revision(struct udevice *dev, char *buf, int size)
 	return 0;
 }
 
+int soc_sandbox_get_soc_id(struct udevice *dev, char *buf, int size)
+{
+	snprintf(buf, size, "r8a774a1");
+
+	return 0;
+}
+
 static const struct soc_ops soc_sandbox_ops = {
 	.get_family = soc_sandbox_get_family,
 	.get_revision = soc_sandbox_get_revision,
 	.get_machine = soc_sandbox_get_machine,
+	.get_soc_id = soc_sandbox_get_soc_id,
 };
 
 int soc_sandbox_probe(struct udevice *dev)

@@ -46,6 +46,16 @@ int soc_get_revision(struct udevice *dev, char *buf, int size)
 	return ops->get_revision(dev, buf, size);
 }
 
+int soc_get_soc_id(struct udevice *dev, char *buf, int size)
+{
+	struct soc_ops *ops = soc_get_ops(dev);
+
+	if (!ops->get_soc_id)
+		return -ENOSYS;
+
+	return ops->get_soc_id(dev, buf, size);
+}
+
 const struct soc_attr *
 soc_device_match(const struct soc_attr *matches)
 {
@@ -61,7 +71,7 @@ soc_device_match(const struct soc_attr *matches)
 
 	while (1) {
 		if (!(matches->machine || matches->family ||
-		      matches->revision))
+		      matches->revision || matches->soc_id))
 			break;
 
 		match = true;
@@ -83,6 +93,13 @@ soc_device_match(const struct soc_attr *matches)
 		if (matches->revision) {
 			if (!soc_get_revision(soc, str, SOC_MAX_STR_SIZE)) {
 				if (strcmp(matches->revision, str))
+					match = false;
+			}
+		}
+
+		if (matches->soc_id) {
+			if (!soc_get_soc_id(soc, str, SOC_MAX_STR_SIZE)) {
+				if (strcmp(matches->soc_id, str))
 					match = false;
 			}
 		}
