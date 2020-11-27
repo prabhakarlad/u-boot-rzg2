@@ -879,6 +879,16 @@ static const struct renesas_sdhi_quirks sdhi_quirks_4tap_nohs400 = {
 	.hs400_4taps = true,
 };
 
+static const struct renesas_sdhi_quirks sdhi_quirks_4tap = {
+	.hs400_4taps = true,
+	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
+};
+
+static const struct renesas_sdhi_quirks sdhi_quirks_r8a7795_es30 = {
+	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
+	.hs400_calib_table = r8a7795_calib_table,
+};
+
 static const struct renesas_sdhi_quirks sdhi_quirks_r8a7796_es12 = {
 	.hs400_4taps = true,
 	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
@@ -919,6 +929,26 @@ static const struct soc_attr sdhi_quirks_match[]  = {
 	},
 	{ .soc_id = "r8a774b1",
 	  .data = &sdhi_quirks_r8a77965
+	},
+	{ .soc_id = "r8a774e1",
+	  .revision = "ES3.0",
+	  .data = &sdhi_quirks_r8a7795_es30
+	},
+	{ .soc_id = "r8a7795",
+	  .revision = "ES1.0",
+	  .data = &sdhi_quirks_4tap_nohs400_b17_dtrend
+	},
+	{ .soc_id = "r8a7795",
+	  .revision = "ES1.1",
+	  .data = &sdhi_quirks_4tap_nohs400_b17_dtrend
+	},
+	{ .soc_id = "r8a7795",
+	  .revision = "ES2.0",
+	  .data = &sdhi_quirks_4tap
+	},
+	{ .soc_id = "r8a7795",
+	  .revision = "ES3.0",
+	  .data = &sdhi_quirks_r8a7795_es30
 	},
 	{ .soc_id = "r8a7796",
 	  .revision = "ES1.0",
@@ -971,7 +1001,8 @@ static void renesas_sdhi_add_quirks(struct tmio_sd_plat *plat,
 		if (quirks == &sdhi_quirks_r8a7796_es12 ||
 		    quirks == &sdhi_quirks_r8a77965)
 			priv->adjust_hs400_offset = 3;
-		else if (quirks == &sdhi_quirks_r8a7796_es13)
+		else if (quirks == &sdhi_quirks_r8a7796_es13 ||
+			 quirks == &sdhi_quirks_r8a7795_es30)
 			priv->adjust_hs400_offset = 0;
 	}
 }
