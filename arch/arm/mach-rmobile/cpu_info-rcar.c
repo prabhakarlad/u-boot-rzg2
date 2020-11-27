@@ -6,6 +6,7 @@
  */
 #include <common.h>
 #include <asm/io.h>
+#include <soc.h>
 
 #define PRR_MASK		0x7fff
 #define R8A7796_REV_1_0		0x5200
@@ -21,9 +22,28 @@ static u32 rmobile_get_prr(void)
 #endif
 }
 
+static bool is_rzg_family(void)
+{
+	bool rzg_family_type = false;
+	struct udevice *soc;
+	char name[16];
+
+	if (!(soc_get(&soc) || soc_get_family(soc, name, 16))) {
+		if (!strcmp(name, "RZ/G2"))
+			rzg_family_type = true;
+	}
+
+	return rzg_family_type;
+}
+
 u32 rmobile_get_cpu_type(void)
 {
-	return (rmobile_get_prr() & 0x00007F00) >> 8;
+	u32 soc_id = (rmobile_get_prr() & 0x7F00) >> 8;
+
+	if (is_rzg_family())
+		soc_id |= RZG_CPU_MASK;
+
+	return soc_id;
 }
 
 u32 rmobile_get_cpu_rev_integer(void)

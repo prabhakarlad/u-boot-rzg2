@@ -3,12 +3,12 @@
  * (C) Copyright 2012 Nobuhiro Iwamatsu <nobuhiro.iwamatsu.yj@renesas.com>
  * (C) Copyright 2012 Renesas Solutions Corp.
  */
+#include <asm/cache.h>
+#include <asm/io.h>
 #include <common.h>
 #include <cpu_func.h>
-#include <asm/cache.h>
-#include <init.h>
-#include <asm/io.h>
 #include <env.h>
+#include <init.h>
 #include <linux/ctype.h>
 
 #ifdef CONFIG_ARCH_CPU_INIT
@@ -59,6 +59,10 @@ static const struct {
 } rmobile_cpuinfo[] = {
 	{ RMOBILE_CPU_TYPE_SH73A0, "SH73A0" },
 	{ RMOBILE_CPU_TYPE_R8A7740, "R8A7740" },
+	{ RMOBILE_CPU_TYPE_R8A774A1, "R8A774A1" },
+	{ RMOBILE_CPU_TYPE_R8A774B1, "R8A774B1" },
+	{ RMOBILE_CPU_TYPE_R8A774C0, "R8A774C0" },
+	{ RMOBILE_CPU_TYPE_R8A774E1, "R8A774E1" },
 	{ RMOBILE_CPU_TYPE_R8A7790, "R8A7790" },
 	{ RMOBILE_CPU_TYPE_R8A7791, "R8A7791" },
 	{ RMOBILE_CPU_TYPE_R8A7792, "R8A7792" },
