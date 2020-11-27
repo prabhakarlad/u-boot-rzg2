@@ -19,6 +19,7 @@
 #include <linux/io.h>
 #include <linux/sizes.h>
 #include <power/regulator.h>
+#include <soc.h>
 #include <asm/unaligned.h>
 #include "tmio-common.h"
 
@@ -855,6 +856,115 @@ static ulong renesas_sdhi_clk_get_rate(struct tmio_sd_priv *priv)
 	return clk_get_rate(&priv->clk);
 }
 
+#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT) || \
+    CONFIG_IS_ENABLED(MMC_HS200_SUPPORT) || \
+    CONFIG_IS_ENABLED(MMC_HS400_SUPPORT)
+
+#define SDHI_CALIB_TABLE_MAX 32
+
+struct renesas_sdhi_quirks {
+	bool hs400_disabled;
+	bool hs400_4taps;
+	u32 hs400_bad_taps;
+	const u8 (*hs400_calib_table)[SDHI_CALIB_TABLE_MAX];
+};
+
+static const struct renesas_sdhi_quirks sdhi_quirks_4tap_nohs400_b17_dtrend = {
+	.hs400_disabled = true,
+	.hs400_4taps = true,
+};
+
+static const struct renesas_sdhi_quirks sdhi_quirks_4tap_nohs400 = {
+	.hs400_disabled = true,
+	.hs400_4taps = true,
+};
+
+static const struct renesas_sdhi_quirks sdhi_quirks_r8a7796_es12 = {
+	.hs400_4taps = true,
+	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
+	.hs400_calib_table = r8a7796_rev1_calib_table,
+};
+
+static const struct renesas_sdhi_quirks sdhi_quirks_r8a7796_es13 = {
+	.hs400_bad_taps = BIT(1) | BIT(3) | BIT(5) | BIT(7),
+	.hs400_calib_table = r8a7796_rev3_calib_table,
+};
+
+/*
+ * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
+ * So, we want to treat them equally and only have a match for ES1.2 to enforce
+ * this if there ever will be a way to distinguish ES1.2.
+ */
+static const struct soc_attr sdhi_quirks_match[]  = {
+	{ .soc_id = "r8a774a1",
+	  .revision = "ES1.0",
+	  .data = &sdhi_quirks_4tap_nohs400_b17_dtrend
+	},
+	{ .soc_id = "r8a774a1",
+	  .revision = "ES1.1",
+	  .data = &sdhi_quirks_4tap_nohs400
+	},
+	{ .soc_id = "r8a774a1",
+	  .revision = "ES1.2",
+	  .data = &sdhi_quirks_r8a7796_es12
+	},
+	{ .soc_id = "r8a774a1",
+	  .revision = "ES1.3",
+	  .data = &sdhi_quirks_r8a7796_es13
+	},
+	{ .soc_id = "r8a7796",
+	  .revision = "ES1.0",
+	  .data = &sdhi_quirks_4tap_nohs400_b17_dtrend
+	},
+	{ .soc_id = "r8a7796",
+	  .revision = "ES1.1",
+	  .data = &sdhi_quirks_4tap_nohs400
+	},
+	{ .soc_id = "r8a7796",
+	  .revision = "ES1.2",
+	  .data = &sdhi_quirks_r8a7796_es12
+	},
+	{ .soc_id = "r8a7796",
+	  .revision = "ES1.3",
+	  .data = &sdhi_quirks_r8a7796_es13
+	},
+	{ /* Sentinel. */ },
+};
+
+static void renesas_sdhi_add_quirks(struct tmio_sd_plat *plat,
+				    struct tmio_sd_priv *priv,
+				    const struct renesas_sdhi_quirks *quirks)
+{
+	priv->read_poll_flag = TMIO_SD_DMA_INFO1_END_RD2;
+	priv->nrtaps = 8;
+
+	if (!quirks)
+		return;
+
+	if (quirks->hs400_disabled) {
+		plat->cfg.host_caps &= ~MMC_MODE_HS400;
+		if (quirks == &sdhi_quirks_4tap_nohs400_b17_dtrend)
+			priv->read_poll_flag = TMIO_SD_DMA_INFO1_END_RD;
+	}
+
+	if (quirks->hs400_4taps)
+		priv->nrtaps = 4;
+
+	if (quirks->hs400_bad_taps)
+		priv->hs400_bad_tap = quirks->hs400_bad_taps;
+
+	if (quirks->hs400_calib_table) {
+		priv->adjust_hs400_enable = true;
+		priv->adjust_hs400_calib_table =
+			quirks->hs400_calib_table[!rmobile_is_gen3_mmc0(priv)];
+		if (quirks == &sdhi_quirks_r8a7796_es12)
+			priv->adjust_hs400_offset = 3;
+		else if (quirks == &sdhi_quirks_r8a7796_es13)
+			priv->adjust_hs400_offset = 0;
+	}
+}
+#endif
+
 static void renesas_sdhi_filter_caps(struct udevice *dev)
 {
 	struct tmio_sd_priv *priv = dev_get_priv(dev);
@@ -866,6 +976,13 @@ static void renesas_sdhi_filter_caps(struct udevice *dev)
     CONFIG_IS_ENABLED(MMC_HS200_SUPPORT) || \
     CONFIG_IS_ENABLED(MMC_HS400_SUPPORT)
 	struct tmio_sd_plat *plat = dev_get_platdata(dev);
+	const struct soc_attr *attr;
+
+	attr = soc_device_match(sdhi_quirks_match);
+	if (attr) {
+		renesas_sdhi_add_quirks(plat, priv, attr->data);
+		return;
+	}
 
 	/* HS400 is not supported on H3 ES1.x and M3W ES1.0, ES1.1 */
 	if (((rmobile_get_cpu_type() == RMOBILE_CPU_TYPE_R8A7795) &&
