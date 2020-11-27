@@ -890,6 +890,11 @@ static const struct renesas_sdhi_quirks sdhi_quirks_r8a7796_es13 = {
 	.hs400_calib_table = r8a7796_rev3_calib_table,
 };
 
+static const struct renesas_sdhi_quirks sdhi_quirks_r8a77965 = {
+	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
+	.hs400_calib_table = r8a77965_calib_table,
+};
+
 /*
  * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
  * So, we want to treat them equally and only have a match for ES1.2 to enforce
@@ -912,6 +917,9 @@ static const struct soc_attr sdhi_quirks_match[]  = {
 	  .revision = "ES1.3",
 	  .data = &sdhi_quirks_r8a7796_es13
 	},
+	{ .soc_id = "r8a774b1",
+	  .data = &sdhi_quirks_r8a77965
+	},
 	{ .soc_id = "r8a7796",
 	  .revision = "ES1.0",
 	  .data = &sdhi_quirks_4tap_nohs400_b17_dtrend
@@ -927,6 +935,9 @@ static const struct soc_attr sdhi_quirks_match[]  = {
 	{ .soc_id = "r8a7796",
 	  .revision = "ES1.3",
 	  .data = &sdhi_quirks_r8a7796_es13
+	},
+	{ .soc_id = "r8a77965",
+	  .data = &sdhi_quirks_r8a77965
 	},
 	{ /* Sentinel. */ },
 };
@@ -957,7 +968,8 @@ static void renesas_sdhi_add_quirks(struct tmio_sd_plat *plat,
 		priv->adjust_hs400_enable = true;
 		priv->adjust_hs400_calib_table =
 			quirks->hs400_calib_table[!rmobile_is_gen3_mmc0(priv)];
-		if (quirks == &sdhi_quirks_r8a7796_es12)
+		if (quirks == &sdhi_quirks_r8a7796_es12 ||
+		    quirks == &sdhi_quirks_r8a77965)
 			priv->adjust_hs400_offset = 3;
 		else if (quirks == &sdhi_quirks_r8a7796_es13)
 			priv->adjust_hs400_offset = 0;
