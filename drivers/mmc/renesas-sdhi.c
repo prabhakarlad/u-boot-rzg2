@@ -905,6 +905,10 @@ static const struct renesas_sdhi_quirks sdhi_quirks_r8a77965 = {
 	.hs400_calib_table = r8a77965_calib_table,
 };
 
+static const struct renesas_sdhi_quirks sdhi_quirks_r8a77990 = {
+	.hs400_calib_table = r8a77990_calib_table,
+};
+
 /*
  * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
  * So, we want to treat them equally and only have a match for ES1.2 to enforce
@@ -929,6 +933,9 @@ static const struct soc_attr sdhi_quirks_match[]  = {
 	},
 	{ .soc_id = "r8a774b1",
 	  .data = &sdhi_quirks_r8a77965
+	},
+	{ .soc_id = "r8a774c0",
+	  .data = &sdhi_quirks_r8a77990
 	},
 	{ .soc_id = "r8a774e1",
 	  .revision = "ES3.0",
@@ -969,6 +976,9 @@ static const struct soc_attr sdhi_quirks_match[]  = {
 	{ .soc_id = "r8a77965",
 	  .data = &sdhi_quirks_r8a77965
 	},
+	{ .soc_id = "r8a77990",
+	  .data = &sdhi_quirks_r8a77990
+	},
 	{ /* Sentinel. */ },
 };
 
@@ -999,7 +1009,8 @@ static void renesas_sdhi_add_quirks(struct tmio_sd_plat *plat,
 		priv->adjust_hs400_calib_table =
 			quirks->hs400_calib_table[!rmobile_is_gen3_mmc0(priv)];
 		if (quirks == &sdhi_quirks_r8a7796_es12 ||
-		    quirks == &sdhi_quirks_r8a77965)
+		    quirks == &sdhi_quirks_r8a77965 ||
+		    quirks == &sdhi_quirks_r8a77990)
 			priv->adjust_hs400_offset = 3;
 		else if (quirks == &sdhi_quirks_r8a7796_es13 ||
 			 quirks == &sdhi_quirks_r8a7795_es30)
